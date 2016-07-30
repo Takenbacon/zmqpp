@@ -328,27 +328,25 @@ bool socket::send_raw(char const* buffer, size_t const length, int const flags /
 	throw zmq_internal_exception();
 }
 
-bool socket::receive_raw(char* buffer, size_t& length, int const flags /* = NORMAL */)
+size_t socket::receive_raw(char* buffer, size_t const length, int const flags /* = NORMAL */)
 {
 #if (ZMQ_VERSION_MAJOR == 2)
-		int result = zmq_recv( _socket, &_recv_buffer, flags );
-#elif (ZMQ_VERSION_MAJOR < 3) || ((ZMQ_VERSION_MAJOR == 3) && (ZMQ_VERSION_MINOR < 2))
-		int result = zmq_recvmsg( _socket, &_recv_buffer, flags );
+	int result = zmq_recv(_socket, &_recv_buffer, flags);
 #else
-		int result = zmq_msg_recv( &_recv_buffer, _socket, flags );
+	int result = zmq_recv(_socket, buffer, length, flags);
 #endif
 
 	if(result >= 0)
 	{
-		length = zmq_msg_size(&_recv_buffer);
-		memcpy(buffer, zmq_msg_data(&_recv_buffer), length);
-
-		return true;
+#if (ZMQ_VERSION_MAJOR == 2)
+		memmove(buffer, zmq_msg_data(&_recv_buffer), length);
+#endif
+		return result;
 	}
 
 	if (EAGAIN == zmq_errno() || EINTR == zmq_errno())
 	{
-		return false;
+		return 0;
 	}
 
 	throw zmq_internal_exception();

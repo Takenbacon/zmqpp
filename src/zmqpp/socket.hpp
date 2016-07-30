@@ -314,11 +314,11 @@ public:
 	 * then this function will return false.
 	 *
 	 * \param buffer byte buffer pointer to start writing to
-	 * \param length max length of the buffer
+	 * \param length max number of bytes to receive
 	 * \param flags message receive flags
-	 * \return true if message part received, false if it would have blocked
+	 * \return number of bytes in the message if successful
 	 */
-	bool receive_raw(char* buffer, size_t& length, int const flags = normal);
+	size_t receive_raw(char* buffer, size_t const length, int const flags = normal);
 
 	/**
 	 *
